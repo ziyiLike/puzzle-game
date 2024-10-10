@@ -29,25 +29,32 @@ const App = () => {
   };
 
   const setRandomNumberList = () => {
-    const newArray = shuffleArray(Array.from({ length: levelMap[level] }, (_, index) => (index + 1 === levelMap[level] ? '' : index + 1)));
-    if (reverseArrayNum(newArray.filter((it) => it)) % 2 !== 0) {
+    const layer = Math.sqrt(levelMap[level]);
+    const newArray = shuffleArray(Array.from({ length: levelMap[level] }, (_, index) => (index + 1 === levelMap[level] ? 0 : index + 1)));
+    const currentIndex = newArray.findIndex((item) => item === 0);
+    const reverseAddNum = layer % 2 === 0 ? Math.floor(currentIndex / layer) + 1 : 0;
+    if ((reverseArrayNum(newArray.filter((it) => it)) + reverseAddNum) % 2 !== 0) {
       swapIndex(
         levelMap[level] - 3,
         levelMap[level] - 2,
-        newArray.filter((it) => it)
+        newArray.filter((it) => it),
+        currentIndex
       );
     } else {
       setActiveArray(newArray);
     }
   };
 
-  const swapIndex = (idx1: number, idx2: number, arr?: any[]) => {
+  const swapIndex = (idx1: number, idx2: number, arr?: any[], currentIndex?: number) => {
     const swapArr = arr || activeArray;
     const temp = swapArr[idx1];
     const newArray = [...swapArr];
     newArray[idx1] = newArray[idx2];
     newArray[idx2] = temp;
-    setActiveArray(arr ? [...newArray, ''] : newArray);
+    if (arr) {
+      newArray.splice(currentIndex!, 0, 0);
+    }
+    setActiveArray(newArray);
     !arr && gameStart();
   };
 
@@ -64,7 +71,7 @@ const App = () => {
 
   const handleSliderClick = (item: number | '') => {
     const clickIndex = activeArray.findIndex((i) => item === i);
-    const currentIndex = activeArray.findIndex((i) => i === '');
+    const currentIndex = activeArray.findIndex((i) => i === 0);
     const layer = Math.sqrt(levelMap[level]);
     const movement = clickIndex - currentIndex;
     if (Math.abs(movement) === 1 || Math.abs(movement) === layer) {
@@ -93,7 +100,7 @@ const App = () => {
   };
 
   const swiperTo = (derection: 'left' | 'right' | 'up' | 'down') => {
-    const currentIndex = activeArray.findIndex((item) => item === '');
+    const currentIndex = activeArray.findIndex((item) => item === 0);
     const layer = Math.sqrt(levelMap[level]);
     const moveWidth = sliderWidthMap[level];
     if (!animation) {
@@ -145,7 +152,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (reverseArrayNum(activeArray.filter((it) => it)) === 0 && activeArray.at(-1) === '') {
+    if (reverseArrayNum(activeArray.filter((it) => it)) === 0 && activeArray.at(-1) === 0) {
       timer && clearInterval(timer as any);
       setTimer(undefined);
       setStart(false);
@@ -162,11 +169,13 @@ const App = () => {
   }, [activeArray]);
 
   useEffect(() => {
+    setTime(0);
+    setWin(false);
     setRandomNumberList();
   }, [level]);
 
   useEffect(() => {
-    gsap.set([`.item-`], { clearProps: 'x,y' });
+    gsap.set([`.item-0`], { clearProps: 'x,y' });
     setAnimation(false);
   }, [activeArray]);
 
@@ -180,10 +189,10 @@ const App = () => {
   return (
     <div className="w-[100vw] flex items-center flex-col mt-20 select-none">
       <Statistic title="Move Slider To Start" value={time} />
-      <div style={{ gridTemplateColumns: `repeat(${Math.sqrt(levelMap[level])}, minmax(0, 1fr))` }} className={['grid', 'mt-10', 'border-gray-200', 'gap-[4px]', 'border-solid', 'border-4', 'relative'].join(' ')}>
+      <div style={{ gridTemplateColumns: `repeat(${Math.sqrt(levelMap[level])}, minmax(0, 1fr))` }} className={['grid', 'mt-[20px]', 'border-gray-200', 'gap-[4px]', 'border-solid', 'border-4', 'relative'].join(' ')}>
         {activeArray.map((item, index) => (
           <div key={index} style={{ background: item && '#f3f3f3', width: sliderWidthMap[level] + 'px', height: sliderWidthMap[level] + 'px' }} className={`flex items-center justify-center item-${item}`} onClick={() => handleSliderClick(item)}>
-            {item}
+            {item || ''}
           </div>
         ))}
         {win && (
