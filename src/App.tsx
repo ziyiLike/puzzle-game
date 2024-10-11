@@ -166,6 +166,8 @@ const App = () => {
         setMaxRecordMap(tempMaxRecordMap);
       }
     }
+    gsap.set([`.item-0`], { clearProps: 'x,y' });
+    setAnimation(false);
   }, [activeArray]);
 
   useEffect(() => {
@@ -173,11 +175,6 @@ const App = () => {
     setWin(false);
     setRandomNumberList();
   }, [level]);
-
-  useEffect(() => {
-    gsap.set([`.item-0`], { clearProps: 'x,y' });
-    setAnimation(false);
-  }, [activeArray]);
 
   const handleKeyboardListener = (event: KeyboardEvent) => {
     const key = event.key;
