@@ -2,6 +2,9 @@
 
 A puzzle game with React + Vite + Typescript.
 
+## Demo
+[Demo](https://puzzle.ziyilike.com)
+
 ### Installation
 
 ```
